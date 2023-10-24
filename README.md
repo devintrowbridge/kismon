@@ -84,6 +84,13 @@ Note: The GPS reciever needs to be setup before running kismon and kismet.
 
 * Website:         https://www.salecker.org/software/kismon.html
 * Git repository:  https://github.com/Kismon/kismon
+* References:
+* https://www.freecodecamp.org/news/wireless-security-using-raspberry-pi-4-kismet-and-python/
+* https://github.com/c-bless/kismetanalyzer
+* https://github.com/nattimmis/kismet-modified-range/blob/master/README
+* https://en.wikipedia.org/wiki/List_of_WLAN_channels
+* https://kismet-rest.readthedocs.io/_/downloads/en/latest/pdf/
+* https://github.com/hobobandy/plugin-kismet-creepdetector
 
 ## Author
 Patrick Salecker <mail@salecker.org>
