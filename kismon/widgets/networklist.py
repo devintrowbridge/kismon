@@ -29,7 +29,7 @@ class NetworkList:
         self.enabled_columns = {}
         self.columns = ("BSSID", "Type", "SSID", "Ch", "Crypt",
                         "First Seen", "Last Seen", "Latitude", "Longitude",
-                        "Signal dbm", "Comment", "Servers")
+                        "Signal dbm", "Comment", "Servers", "CodeName")
         self.available_columns = {}
         if len(self.config['network_list_columns']) == 0:
             self.config['network_list_columns'] = list(self.columns)
@@ -38,6 +38,9 @@ class NetworkList:
             if column == "Comment":
                 renderer.set_property('editable', True)
                 renderer.connect("editing-started", self.on_comment_editing_started)
+            elif column == "CodeName":
+            	renderer.set_property('editable', True)
+                renderer.connect("editing-started", self.on_codename_editing_started)
             elif column == "Signal dbm":
                 renderer = Gtk.CellRendererProgress()
 
@@ -81,6 +84,7 @@ class NetworkList:
             GObject.TYPE_STRING,  # comment
             GObject.TYPE_STRING,  # servers
             GObject.TYPE_INT,     # signal dbm + 100 (progressbar)
+            GObject.TYPE_STRING,  # codename
         )
         self.treeview.set_model(self.store)
 
@@ -189,7 +193,15 @@ class NetworkList:
         network = self.networks.get_network(self.network_selected)
         network['comment'] = widget.get_text()
         self.add_network(self.network_selected)
+        
+    def on_codename_editing_started(self, widget, editable, path):
+        editable.connect("editing-done", self.on_codename_editing_done)
 
+    def on_codename_editing_done(self, widget):
+        network = self.networks.get_network(self.network_selected)
+        network['codename'] = widget.get_text()
+        self.add_network(self.network_selected)
+        
     def prepare_network_servers(self, value):
         if len(value) == 0 or value is None:
             servers = None
@@ -307,6 +319,11 @@ class NetworkList:
         else:
             comment = network['comment']
 
+        if network['codename'] == '':
+            codename = None
+        else:
+            codename = network['codename']
+
         line = [mac,
                 self.prepare_network_type(network["type"]),
                 self.prepare_network_ssid(network["ssid"]),
@@ -319,7 +336,8 @@ class NetworkList:
                 signal,
                 comment,
                 self.prepare_network_servers(network["servers"]),
-                signal_strength
+                signal_strength,
+                codename
                 ]
         try:
             old_line = self.network_lines[mac]

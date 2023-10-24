@@ -1,5 +1,3 @@
-# CHANGE TEST
-
 # Kismon
 
 Kismon is GUI client for kismet (wireless scanner/sniffer/monitor) with several features:
