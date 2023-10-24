@@ -116,8 +116,8 @@ class Networks:
             network = self.networks[mac]
             if 'comment' not in network:
                 network['comment'] = ""
-            if 'codename' not in network:
-                network['codename'] = ""                
+#            if 'codename' not in network:
+#                network['codename'] = ""                
             if 'servers' not in network:
                 network['servers'] = []
             if 'crypt' not in network:
@@ -318,7 +318,7 @@ class Networks:
                 },
                 "comment": '',
                 "servers": [],
-                "codename": '',                
+#                "codename": '',                
             }
             self.networks[mac] = network
         else:
@@ -331,8 +331,8 @@ class Networks:
                 }
             if 'comment' not in network:
                 network['comment'] = ''
-            if 'codename' not in network:
-                network['codename'] = ''                
+#            if 'codename' not in network:
+#                network['codename'] = ''                
 
             if device['kismet.device.base.last_time'] > network["lasttime"]:
                 if gps_fix and ((network["signal_dbm"]["max"] < signal_dbm_max and signal_dbm_max != 0) or
@@ -365,8 +365,8 @@ class Networks:
         if mac not in self.networks:
             if 'comment' not in data:
                 data['comment'] = ""
-            if 'codename' not in data:
-                data['codename'] = ""               
+#            if 'codename' not in data:
+#                data['codename'] = ""               
             if 'servers' not in data:
                 data['servers'] = []
             self.networks[mac] = data
