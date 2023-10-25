@@ -260,6 +260,7 @@ class TestKismon(unittest.TestCase):
         main_window.network_list.on_copy_field(None)
         main_window.network_list.on_copy_network(None)
         main_window.network_list.on_comment_editing_done(test_widget)
+        main_window.network_list.on_codename_editing_done(test_widget)
         main_window.network_list.remove_network('00:12:2A:03:B9:12')
         main_window.network_list.remove_column('Ch')
         main_window.network_list.add_column('Ch')
