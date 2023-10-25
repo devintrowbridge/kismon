@@ -318,7 +318,7 @@ class Networks:
                 },
                 "comment": '',
                 "servers": [],
-                "codename": '',                
+                "codename": '',
             }
             self.networks[mac] = network
         else:

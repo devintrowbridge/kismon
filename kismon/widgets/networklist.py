@@ -83,8 +83,8 @@ class NetworkList:
             GObject.TYPE_INT,     # signal dbm
             GObject.TYPE_STRING,  # comment
             GObject.TYPE_STRING,  # servers
+            GObject.TYPE_STRING,  # codename            
             GObject.TYPE_INT,     # signal dbm + 100 (progressbar)
-            GObject.TYPE_STRING,  # codename
         )
         self.treeview.set_model(self.store)
 
@@ -336,8 +336,8 @@ class NetworkList:
                 signal,
                 comment,
                 self.prepare_network_servers(network["servers"]),
+                codename,
                 signal_strength,
-                codename
                 ]
         try:
             old_line = self.network_lines[mac]
