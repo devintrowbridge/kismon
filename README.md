@@ -1,11 +1,15 @@
-# Kismon
+# Kismon2
 
-Kismon is GUI client for kismet (wireless scanner/sniffer/monitor) with several features:
-* a live map of the networks
+Kismon2 is a GUI client for kismet (wireless scanner/sniffer/monitor) forked from the original Kismon, with several features:
+* a live map of devices
 * file import: netxml (kismet), csv (old kismet version), json (kismon)
 * file export: kmz (Google Earth) and all import formats
 * signal graph for each network
 * it can connect to multiple kismet servers simultaneously
+Future Improvements will include:
+* analysis of behaviors (patterns over time of individual devices, aproximate locations in reference to the kismet server device, etc)
+* de-randmization of MAC addresses utlizing probe request signatures
+* incorporation of bluetooth, and other RF signals (via HackRF, etc)
 
 ![Kismon Window](https:/files.salecker.org/kismon/images/0.8/kismon_window.png)
 
@@ -20,7 +24,7 @@ Kismon is GUI client for kismet (wireless scanner/sniffer/monitor) with several 
 
 ## Kismet Compatibility
 
-Be aware that kismon is starting with version 1.0 not compatible with kismet servers running versions older than 2019-01-beta2.
+Be aware that kismon starting with version 1.0 is not compatible with kismet servers running versions older than 2019-01-beta2.
 
 Here is a list of the known compatibility:
 
@@ -43,7 +47,7 @@ Here is a list of the known compatibility:
 $ sudo apt-get install git python3 python3-gi gir1.2-gtk-3.0 \
  gir1.2-gdkpixbuf-2.0 python3-cairo python3-simplejson \
  gir1.2-osmgpsmap-1.0
-$ git clone https://github.com/Kismon/kismon.git kismon
+$ git clone https://github.com/devintrowbridge/kismon.git kismon
 $ cd kismon
 $ python3 setup.py build
 $ sudo python3 setup.py install
@@ -56,7 +60,7 @@ Or just use `make` instead of the python commands.
 
 ### Kismet Python module
 
-The Python module of kismet isn't included in the most Linux distributions and has to be installed manually.
+The Python module of kismet isn't included in most Linux distributions and has to be installed manually.
 
 ```
 $ git clone https://github.com/kismetwireless/python-kismet-rest.git
@@ -72,28 +76,30 @@ $ make builddeb
 ```
 
 ## Usage
-Launch kismon from the command line after you started kismet or click the the kismon icon in the menu of your desktop environment.
+Launch kismon2 from the command line after you've started kismet or click the the kismon2 icon in the menu of your desktop environment.
 
 Hotkeys
 * Fullscreen:  F11
 * Zoom in/out: Ctrl + "i"/"o"
 
-Note: The GPS reciever needs to be setup before running kismon and kismet.
+Note: The GPS reciever needs to be setup before running kismon2 and kismet.
 
 ## Links
 
-* Website:         https://www.salecker.org/software/kismon.html
-* Git repository:  https://github.com/Kismon/kismon
+* Original Website:         https://www.salecker.org/software/kismon.html
+* Original Git repository:  https://github.com/Kismon/kismon
 * References:
-* https://www.freecodecamp.org/news/wireless-security-using-raspberry-pi-4-kismet-and-python/
-* https://github.com/c-bless/kismetanalyzer
-* https://github.com/nattimmis/kismet-modified-range/blob/master/README
-* https://en.wikipedia.org/wiki/List_of_WLAN_channels
-* https://kismet-rest.readthedocs.io/_/downloads/en/latest/pdf/
-* https://github.com/hobobandy/plugin-kismet-creepdetector
+*                           https://www.freecodecamp.org/news/wireless-security-using-raspberry-pi-4-kismet-and-python/
+*                           https://github.com/c-bless/kismetanalyzer
+*                           https://github.com/nattimmis/kismet-modified-range/blob/master/README
+*                           https://en.wikipedia.org/wiki/List_of_WLAN_channels
+*                           https://kismet-rest.readthedocs.io/_/downloads/en/latest/pdf/
+*                           https://github.com/hobobandy/plugin-kismet-creepdetector
 
-## Author
+## Original Author
 Patrick Salecker <mail@salecker.org>
+Fork:
+Devin Trowbridge && CrystalHeeler
 
 ## License
 This project is licensed under BSD, for more details check [COPYING](COPYING).
