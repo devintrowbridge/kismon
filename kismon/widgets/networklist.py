@@ -4,7 +4,7 @@ from gi.repository import GObject
 from gi.repository import GLib
 
 import kismon.utils as utils
-
+from kismon.windows.editnet import EditNetWindow
 
 class NetworkList:
     def __init__(self, networks, locate_network_on_map, on_signal_graph, config):
@@ -29,19 +29,13 @@ class NetworkList:
         self.enabled_columns = {}
         self.columns = ("BSSID", "Type", "SSID", "Ch", "Crypt",
                         "First Seen", "Last Seen", "Latitude", "Longitude",
-                        "Signal dbm", "Comment", "Servers", "CodeName")
+                        "Signal dbm", "Comment", "Servers", "Signal dbm + 100" , "CodeName")
         self.available_columns = {}
         if len(self.config['network_list_columns']) == 0:
             self.config['network_list_columns'] = list(self.columns)
         for column in self.columns:
             renderer = Gtk.CellRendererText()
-            if column == "Comment":
-                renderer.set_property('editable', True)
-                renderer.connect("editing-started", self.on_comment_editing_started)
-            elif column == "CodeName":
-            	renderer.set_property('editable', True)
-                renderer.connect("editing-started", self.on_codename_editing_started)
-            elif column == "Signal dbm":
+            if column == "Signal dbm":
                 renderer = Gtk.CellRendererProgress()
 
             tvcolumn = Gtk.TreeViewColumn(column, renderer, text=num)
@@ -113,6 +107,10 @@ class NetworkList:
         network_popup.append(locate_item)
         locate_item.connect("activate", self.on_locate_marker)
 
+        locate_item = Gtk.MenuItem.new_with_label('Edit')
+        network_popup.append(locate_item)
+        locate_item.connect("activate", self.on_edit)
+
         signal_item = Gtk.MenuItem.new_with_label('Signal graph')
         network_popup.append(signal_item)
         signal_item.connect("activate", self.on_signal_graph)
@@ -147,6 +145,21 @@ class NetworkList:
         self.treeview.remove_column(self.enabled_columns[column])
         del self.enabled_columns[column]
         self.config["network_list_columns"].remove(column)
+
+    def on_edit(self, widget):
+        network = self.networks.get_network(self.network_selected)
+        dialog = EditNetWindow(self.network_selected, network)
+        response = dialog.run()
+        
+        # After the dialog exits, grab the user inputs
+        if response == Gtk.ResponseType.OK:
+            result = dialog.get_result()
+            network = self.networks.get_network(self.network_selected)
+            network['comment'] = result['comment']
+            network['codename'] = result['codename']
+            self.add_network(self.network_selected)
+        
+        dialog.destroy()
 
     def on_column_clicked(self, widget, event, num=None):
         self.treeview_click_event = event
@@ -186,22 +199,6 @@ class NetworkList:
         else:
             self.remove_column(column)
 
-    def on_comment_editing_started(self, widget, editable, path):
-        editable.connect("editing-done", self.on_comment_editing_done)
-
-    def on_comment_editing_done(self, widget):
-        network = self.networks.get_network(self.network_selected)
-        network['comment'] = widget.get_text()
-        self.add_network(self.network_selected)
-        
-    def on_codename_editing_started(self, widget, editable, path):
-        editable.connect("editing-done", self.on_codename_editing_done)
-
-    def on_codename_editing_done(self, widget):
-        network = self.networks.get_network(self.network_selected)
-        network['codename'] = widget.get_text()
-        self.add_network(self.network_selected)
-        
     def prepare_network_servers(self, value):
         if len(value) == 0 or value is None:
             servers = None

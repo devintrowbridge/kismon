@@ -39,7 +39,6 @@ import re
 from kismon.client_rest import *
 import kismon.utils as utils
 
-
 class Networks:
     def __init__(self, config, logger):
         self.networks = {}
