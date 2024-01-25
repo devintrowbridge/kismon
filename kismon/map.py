@@ -47,6 +47,8 @@ class Map:
         self.coordinates = {}
         self.tracks = {}
         self.user_agent = user_agent
+        self.fences = []
+        self.active_fence = None
 
         self.init_osm()
 
@@ -61,7 +63,23 @@ class Map:
         self.textures = {}
         self.create_dots()
         self.apply_config()
+        
+        self.right_click_menu()
 
+    def right_click_menu(self):
+        menu = Gtk.Menu()
+        
+        create_fence = Gtk.MenuItem.new_with_label('Start fence')
+        menu.append(create_fence)
+        create_fence.connect("activate", self.start_fence)
+        
+        stop_fence = Gtk.MenuItem.new_with_label('Stop fence')
+        menu.append(stop_fence)
+        stop_fence.connect("activate", self.stop_fence)
+        
+        menu.show_all()
+        self.menu = menu
+            
     def init_osm(self):
         if self.config["source"] != "custom":
             self.osm = OsmGpsMap.Map()
@@ -356,13 +374,45 @@ class Map:
         if self.is_position_invalid(lat, lon):
             return
         self.set_position(float(lat), float(lon))
+        
+    def start_fence(self, widget):
+        self.active_fence = OsmGpsMap.MapTrack()
+        self.osm.track_add(self.active_fence)
+        self.logger.debug("starting fence")
+        
+    def stop_fence(self, widget):
+        # make the start and finish coincident
+        self.active_fence.add_point(self.active_fence.get_point(0))
+        
+        # create a polygon to draw on the map
+        self.fence = OsmGpsMap.MapPolygon()
+        self.fence.track = self.active_fence
+        self.fence.editable = True
+        self.fence.shaded = True
+        
+        # add it to our list of fences
+        self.fences.append(self.fence)
+        self.active_fence = None
+        self.logger.debug(f"stopping fence with {self.fence.track.n_points() - 1} points")
 
     def on_map_pressed(self, actor, event):
-        if event is not None:
-            self.osm.grab_focus()
-            if 32 <= event.x < 48 and 32 <= event.y < 48:
-                self.start_moving()
+        ''' 
+        Event handler when the user clicks on the map
+        '''
+        if event.button == 3: # right mouse
+            self.menu.popup(None, None, None, 0, event.button, event.time, )
+        elif event.button == 1:
+            if event is not None:
+                self.osm.grab_focus()
+                if 32 <= event.x < 48 and 32 <= event.y < 48:
+                    self.start_moving()
+                elif self.active_fence: # only collect points if we're actively geofencing
+                    map_pt = self.osm.convert_screen_to_geographic(event.x, event.y)
+                    self.place_marker(map_pt)
 
+    def place_marker(self, map_point: OsmGpsMap.MapPoint):
+        self.active_fence.add_point(map_point)
+        
     def locate_marker(self, key):
         if key not in self.markers:
             self.logger.debug("marker %s not found" % key)
