@@ -27,17 +27,21 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
-import gi
-gi.require_version('OsmGpsMap', '1.0')
-
 from gi.repository import Gtk
 from gi.repository import Gdk, GdkPixbuf
 from gi.repository import OsmGpsMap
 import cairo
 import io
-from pprint import pprint
+from typing import List, Dict
 
 import os
+
+class Marker:
+    def __init__(self, key, lat, lon, color):
+        self.key = key
+        self.lat = lat
+        self.lon = lon
+        self.color = color
 
 def point_in_polygon(point: OsmGpsMap.MapPoint, polygon: OsmGpsMap.MapPolygon):
     '''
@@ -72,6 +76,20 @@ def point_in_polygon(point: OsmGpsMap.MapPoint, polygon: OsmGpsMap.MapPolygon):
         p1 = p2
     
     return inside
+
+def markers_in_poly(markers: Dict[str, Marker], polygon: OsmGpsMap.MapPolygon) -> List[OsmGpsMap.MapTrack]:
+    '''
+    Prunes the list of markers and returns the subset that are inside the polygon. 
+    '''
+    macs = []
+    
+    point = OsmGpsMap.MapPoint()
+    for (mac,marker) in markers.items():
+        point.set_degrees(marker.lat, marker.lon)
+        if point_in_polygon(point, polygon):
+            macs.append(mac)
+    return macs
+    
 
 class Map:
     def __init__(self, config, logger, user_agent=None):
@@ -426,6 +444,12 @@ class Map:
         self.fence.track.add_point(self.fence.track.get_point(0))
         self.drawing_fence = False
         self.logger.debug(f"stopping fence with {self.fence.track.n_points()} points")
+        
+        mip = markers_in_poly(self.markers, self.fence)
+        
+        self.logger.debug(f"Macs in poly")
+        for mac in mip:
+            self.logger.debug(f"  {mac}")
 
     def on_map_pressed(self, actor, event):
         ''' 
@@ -445,14 +469,6 @@ class Map:
     def place_marker(self, map_point: OsmGpsMap.MapPoint):
         if self.drawing_fence: # only collect points if we're actively geofencing
             self.fence.track.add_point(map_point)
-        else:
-            track = OsmGpsMap.MapTrack()
-            track.add_point(map_point)
-            self.osm.track_add(track)
-            
-            if self.fence:
-                inorout = "in" if point_in_polygon(map_point, self.fence) else "outside"
-                self.logger.info(f"This point is {inorout} the polygon")
         
     def locate_marker(self, key):
         if key not in self.markers:
@@ -493,13 +509,6 @@ class Map:
     def on_changed(self, osm):
         self.save_zoom()
 
-
-class Marker:
-    def __init__(self, key, lat, lon, color):
-        self.key = key
-        self.lat = lat
-        self.lon = lon
-        self.color = color
 
 
 if __name__ == "__main__":
