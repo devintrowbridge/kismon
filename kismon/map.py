@@ -32,9 +32,43 @@ from gi.repository import Gdk, GdkPixbuf
 from gi.repository import OsmGpsMap
 import cairo
 import io
+import numpy as np
 
 import os
 
+def point_in_polygon(point: OsmGpsMap.MapPoint, polygon: OsmGpsMap.MapPolygon):
+    '''
+    Checks to see if a point lies inside of a polygon
+    
+    1. Draw a horizontal line to the right of each point and extend to infinity
+    2. Count the number of times the line intersects with the poly edges
+    3. A point is inside if the the count of intersects is odd, or the the point lies on an edge
+        otherwise the point is outside the polygon
+    '''
+    vertices = polygon.track.get_points()
+    
+    inside = False
+    rlat,rlon = point.get_radians()
+    
+    p1 = vertices[0] 
+    for i in range(len(vertices)): # loop over each vertex in poly
+        p2 = vertices[i % len(vertices)] # get the adjacent point
+        
+        # make sure the point is below the top and above the bottom of edge p1,p2
+        if (rlat > min(p1.rlat, p2.rlat)) and (rlat <= max(p1.rlat, p2.rlat)):
+            # make sure the point is to the left of edge p1,p2
+            if (rlon <= max(p1.rlon, p2.rlon)):
+                # calculate x-intersection of the line connecting the point to the edge
+                lon_intersect = (rlat - p1.rlat) * (p2.rlon - p1.rlon) / (p2.rlat - p1.rlat) + p1.rlon
+        
+                # if the line is vertical and we're to the left of it, then we have to pass through it OR
+                # if we're to the left of the intersection then we also have to pass through it
+                if (p1.rlon == p2.rlon or rlon <= lon_intersect):
+                    inside = not inside
+            
+        p1 = p2
+    
+    return inside
 
 class Map:
     def __init__(self, config, logger, user_agent=None):
@@ -406,12 +440,22 @@ class Map:
                 self.osm.grab_focus()
                 if 32 <= event.x < 48 and 32 <= event.y < 48:
                     self.start_moving()
-                elif self.active_fence: # only collect points if we're actively geofencing
+                else:
                     map_pt = self.osm.convert_screen_to_geographic(event.x, event.y)
                     self.place_marker(map_pt)
 
+
     def place_marker(self, map_point: OsmGpsMap.MapPoint):
-        self.active_fence.add_point(map_point)
+        if self.active_fence: # only collect points if we're actively geofencing
+            self.active_fence.add_point(map_point)
+        else:
+            track = OsmGpsMap.MapTrack()
+            track.add_point(map_point)
+            self.osm.track_add(track)
+            
+            if self.fences:
+                inorout = "in" if point_in_polygon(map_point, self.fences[0]) else "outside"
+                print(f"This point is {inorout} the polygon")
         
     def locate_marker(self, key):
         if key not in self.markers:
