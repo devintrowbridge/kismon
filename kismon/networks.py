@@ -116,7 +116,9 @@ class Networks:
             if 'comment' not in network:
                 network['comment'] = ""
             if 'codename' not in network:
-                network['codename'] = ""                
+                network['codename'] = ""    
+            if 'geofence' not in network:
+                network['geofence'] = ""              
             if 'servers' not in network:
                 network['servers'] = []
             if 'crypt' not in network:
@@ -317,7 +319,8 @@ class Networks:
                 },
                 "comment": '',
                 "servers": [],
-                "codename": '',                
+                "codename": '',      
+                "geofence": ''          
             }
             self.networks[mac] = network
         else:
@@ -365,7 +368,9 @@ class Networks:
             if 'comment' not in data:
                 data['comment'] = ""
             if 'codename' not in data:
-                data['codename'] = ""               
+                data['codename'] = ""   
+            if 'geofence' not in data:
+                data['geofence'] = ""              
             if 'servers' not in data:
                 data['servers'] = []
             self.networks[mac] = data

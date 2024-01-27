@@ -143,7 +143,7 @@ class Core:
         else:
             from kismon.map import Map
             user_agent = 'kismon/%s' % utils.get_version()
-            self.map = Map(self.config["map"], user_agent=user_agent, logger=logger)
+            self.map = Map(self.config["map"], network=self.networks, user_agent=user_agent, logger=logger)
             self.map.set_last_from_config()
 
     def init_client_thread(self, server_id):
@@ -274,7 +274,7 @@ class Core:
                 answer = True
                 logger.debug("yes")
             else:
-                logger.debug("no", response_id)
+                logger.debug(f"no {response_id}")
             self.main_window.server_tabs[server_id].datasources_dialog_answer = answer
 
         dialog.connect("response", dialog_response)

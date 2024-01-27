@@ -29,7 +29,7 @@ class NetworkList:
         self.enabled_columns = {}
         self.columns = ("BSSID", "Type", "SSID", "Ch", "Crypt",
                         "First Seen", "Last Seen", "Latitude", "Longitude",
-                        "Signal dbm", "Comment", "Servers", "Signal dbm + 100" , "CodeName")
+                        "Signal dbm", "Comment", "Servers", "Signal dbm + 100" , "CodeName", "Geofence")
         self.available_columns = {}
         if len(self.config['network_list_columns']) == 0:
             self.config['network_list_columns'] = list(self.columns)
@@ -79,7 +79,10 @@ class NetworkList:
             GObject.TYPE_STRING,  # servers
             GObject.TYPE_INT,     # signal dbm + 100 (progressbar)
             GObject.TYPE_STRING,  # codename
+            GObject.TYPE_INT,     # geofence id
         )
+        
+        self.filter = self.store.filter_new()
         self.treeview.set_model(self.store)
 
         scrolled = Gtk.ScrolledWindow()
@@ -311,15 +314,9 @@ class NetworkList:
             signal = network["signal_dbm"]["last"]
         signal, signal_strength = self.prepare_network_signal(signal)
 
-        if network['comment'] == '':
-            comment = None
-        else:
-            comment = network['comment']
-
-        if network['codename'] == '':
-            codename = None
-        else:
-            codename = network['codename']
+        comment  = None if network['comment']  == '' else network['comment']
+        codename = None if network['codename'] == '' else network['codename']
+        geofence = None if network['geofence'] == '' else network['geofence']
 
         line = [mac,
                 self.prepare_network_type(network["type"]),
@@ -334,7 +331,8 @@ class NetworkList:
                 comment,
                 self.prepare_network_servers(network["servers"]),
                 signal_strength,
-                codename
+                codename,
+                geofence
                 ]
         try:
             old_line = self.network_lines[mac]

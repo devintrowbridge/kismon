@@ -33,6 +33,7 @@ from gi.repository import OsmGpsMap
 import cairo
 import io
 from typing import List, Dict
+from kismon.networks import Networks
 
 import os
 
@@ -92,7 +93,8 @@ def markers_in_poly(markers: Dict[str, Marker], polygon: OsmGpsMap.MapPolygon) -
     
 
 class Map:
-    def __init__(self, config, logger, user_agent=None):
+    def __init__(self, config, logger, network: Networks, user_agent=None):
+        self.network: Networks = network
         self.config = config
         self.logger = logger
         self.generator_is_running = False
@@ -104,6 +106,7 @@ class Map:
         self.user_agent = user_agent
         self.fence = None
         self.drawing_fence = False
+        self.in_poly = []
 
         self.init_osm()
 
@@ -445,11 +448,16 @@ class Map:
         self.drawing_fence = False
         self.logger.debug(f"stopping fence with {self.fence.track.n_points()} points")
         
-        mip = markers_in_poly(self.markers, self.fence)
+        old_mip = self.in_poly
+        self.in_poly = markers_in_poly(self.markers, self.fence)
         
-        self.logger.debug(f"Macs in poly")
-        for mac in mip:
-            self.logger.debug(f"  {mac}")
+        for mac in old_mip:
+            self.network.get_network(mac)['geofence'] = 0
+            self.network.notify_add(mac)
+            
+        for mac in self.in_poly:
+            self.network.get_network(mac)['geofence'] = 1
+            self.network.notify_add(mac)
 
     def on_map_pressed(self, actor, event):
         ''' 
