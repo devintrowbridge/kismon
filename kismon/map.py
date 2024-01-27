@@ -27,12 +27,15 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
+import gi
+gi.require_version('OsmGpsMap', '1.0')
+
 from gi.repository import Gtk
 from gi.repository import Gdk, GdkPixbuf
 from gi.repository import OsmGpsMap
 import cairo
 import io
-import numpy as np
+from pprint import pprint
 
 import os
 
@@ -81,8 +84,8 @@ class Map:
         self.coordinates = {}
         self.tracks = {}
         self.user_agent = user_agent
-        self.fences = []
-        self.active_fence = None
+        self.fence = None
+        self.drawing_fence = False
 
         self.init_osm()
 
@@ -123,8 +126,7 @@ class Map:
                                      min_zoom=self.config["custom_source_min"],
                                      max_zoom=self.config["custom_source_max"])
 
-        self.osd = OsmGpsMap.MapOsd(show_zoom=True, show_coordinates=False, show_scale=False, show_dpad=True,
-                                    show_gps_in_dpad=True)
+        self.osd = OsmGpsMap.MapOsd(show_zoom=True, show_coordinates=False, show_scale=False, show_dpad=True,show_gps_in_dpad=True)
         self.osm.layer_add(self.osd)
 
         self.osm.connect('button-press-event', self.on_map_pressed)
@@ -410,24 +412,20 @@ class Map:
         self.set_position(float(lat), float(lon))
         
     def start_fence(self, widget):
-        self.active_fence = OsmGpsMap.MapTrack()
-        self.osm.track_add(self.active_fence)
+        if self.fence:
+            self.osm.polygon_remove(self.fence)
+            self.osm.track_remove(self.fence.track)
+        self.drawing_fence = True
+        self.fence = OsmGpsMap.MapPolygon()
+        self.fence.track = OsmGpsMap.MapTrack()
+        self.osm.track_add(self.fence.track)
         self.logger.debug("starting fence")
         
     def stop_fence(self, widget):
         # make the start and finish coincident
-        self.active_fence.add_point(self.active_fence.get_point(0))
-        
-        # create a polygon to draw on the map
-        self.fence = OsmGpsMap.MapPolygon()
-        self.fence.track = self.active_fence
-        self.fence.editable = True
-        self.fence.shaded = True
-        
-        # add it to our list of fences
-        self.fences.append(self.fence)
-        self.active_fence = None
-        self.logger.debug(f"stopping fence with {self.fence.track.n_points() - 1} points")
+        self.fence.track.add_point(self.fence.track.get_point(0))
+        self.drawing_fence = False
+        self.logger.debug(f"stopping fence with {self.fence.track.n_points()} points")
 
     def on_map_pressed(self, actor, event):
         ''' 
@@ -444,18 +442,17 @@ class Map:
                     map_pt = self.osm.convert_screen_to_geographic(event.x, event.y)
                     self.place_marker(map_pt)
 
-
     def place_marker(self, map_point: OsmGpsMap.MapPoint):
-        if self.active_fence: # only collect points if we're actively geofencing
-            self.active_fence.add_point(map_point)
+        if self.drawing_fence: # only collect points if we're actively geofencing
+            self.fence.track.add_point(map_point)
         else:
             track = OsmGpsMap.MapTrack()
             track.add_point(map_point)
             self.osm.track_add(track)
             
-            if self.fences:
-                inorout = "in" if point_in_polygon(map_point, self.fences[0]) else "outside"
-                print(f"This point is {inorout} the polygon")
+            if self.fence:
+                inorout = "in" if point_in_polygon(map_point, self.fence) else "outside"
+                self.logger.info(f"This point is {inorout} the polygon")
         
     def locate_marker(self, key):
         if key not in self.markers:
