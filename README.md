@@ -1,15 +1,22 @@
 # Kismon2
 
 Kismon2 is a GUI client for kismet (wireless scanner/sniffer/monitor) forked from the original Kismon, with several features:
-* a live map of devices
-* file import: netxml (kismet), csv (old kismet version), json (kismon)
-* file export: kmz (Google Earth) and all import formats
-* signal graph for each network
-* it can connect to multiple kismet servers simultaneously
+* A live map of devices
+* File import: netxml (kismet), csv (old kismet version), json (kismon)
+* File export: kmz (Google Earth) and all import formats
+* Signal graph for each network
+* It can connect to multiple kismet servers simultaneously
+* Filters for different device types
+
 Future Improvements will include:
-* analysis of behaviors (patterns over time of individual devices, aproximate locations in reference to the kismet server device, etc)
-* de-randmization of MAC addresses utlizing probe request signatures
-* incorporation of bluetooth, and other RF signals (via HackRF, etc)
+* Many GUI and basic function improvements (currently ongoing as of June 2024)
+* Analysis Functions:
+<br> - Geofencing areas, to include device matching over multiple locations (halfway there, June 2024)
+<br> - New device alerts
+<br> - Patterns over time of individual devices (seen at odd times, repeated arrive/depart events)
+<br> - Aproximate locations in reference to the kismet server device
+* De-randmization of MAC addresses utlizing probe request signatures
+* Incorporation of bluetooth, and other RF signals (via HackRF, etc)
 
 ![Kismon Window](https:/files.salecker.org/kismon/images/0.8/kismon_window.png)
 
@@ -21,25 +28,6 @@ Future Improvements will include:
   * osm-gps-map is optional, the map will be disabled if it's missing
 * python3-gi, python3-cairo, python3-simplejson
 * GTK+ 3
-
-## Kismet Compatibility
-
-Be aware that kismon starting with version 1.0 is not compatible with kismet servers running versions older than 2019-01-beta2.
-
-Here is a list of the known compatibility:
-
-* kismon 1.0.3
-  * Kismet 2019-12-R2 - 2020-12-R3
-* kismon 1.0.2
-  * Kismet 2019-12-R2 - 2020-03-R1
-* kismon 1.0.1
-  * Kismet 2019-08-R1 - 2019-09-R1
-* kismon 1.0.0
-  * Kismet 2019-01-beta2 - 2019-04-R1
-* kismon 0.9
-  * Kismet 2011-01-R1 - 2016-07-R1
-* kismon 0.8
-  * Kismet 2011-01-R1 - 2014-02-R1
 
 ## Installation
 
@@ -88,18 +76,10 @@ Note: The GPS reciever needs to be setup before running kismon2 and kismet.
 
 * Original Website:         https://www.salecker.org/software/kismon.html
 * Original Git repository:  https://github.com/Kismon/kismon
-* References:
-*                           https://www.freecodecamp.org/news/wireless-security-using-raspberry-pi-4-kismet-and-python/
-*                           https://github.com/c-bless/kismetanalyzer
-*                           https://github.com/nattimmis/kismet-modified-range/blob/master/README
-*                           https://en.wikipedia.org/wiki/List_of_WLAN_channels
-*                           https://kismet-rest.readthedocs.io/_/downloads/en/latest/pdf/
-*                           https://github.com/hobobandy/plugin-kismet-creepdetector
 
 ## Original Author
 Patrick Salecker <mail@salecker.org>
-Fork:
-Devin Trowbridge && CrystalHeeler
+<br> This Fork: Devin Trowbridge && CrystalHeeler
 
 ## License
 This project is licensed under BSD, for more details check [COPYING](COPYING).
